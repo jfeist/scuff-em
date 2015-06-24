@@ -1266,6 +1266,17 @@ HMatrix *GetSRFlux(RWGGeometry *G, HMatrix *XMatrix, cdouble Omega,
   if (FMatrix==0)
    FMatrix = new HMatrix(NX, NUMSRFLUX, LHM_REAL);
 
+  if(DRMatrix->StorageType!=LHM_NORMAL)
+    ErrExit("GetSRFlux: DRMatrix must have StorageType LHM_NORMAL!");
+  if(DRMatrix->RealComplex!=LHM_COMPLEX)
+    ErrExit("GetSRFlux: DRMatrix must have RealComplex=LHM_COMPLEX!");
+  size_t   DRNR = DRMatrix->NR;
+  cdouble *DRZM = DRMatrix->ZM;
+
+  for(int ns=0; ns<G->NumSurfaces; ns++)
+    if(G->Surfaces[ns]->IsPEC)
+      ErrExit("GetSRFlux: Surface %d is PEC, not supported!",ns);
+
   int NET = G->TotalEdges;
   Log("Computing spatially-resolved fluxes at %i evaluation points, NET=%d...",NX,NET);
 
@@ -1357,8 +1368,6 @@ HMatrix *GetSRFlux(RWGGeometry *G, HMatrix *XMatrix, cdouble Omega,
         int EdgeOffsetb = G->EdgeIndexOffset[nsb];
         int BFOffseta = G->BFIndexOffset[nsa];
         int BFOffsetb = G->BFIndexOffset[nsb];
-        bool IsPECa = Sa->IsPEC;
-        bool IsPECb = Sb->IsPEC;
 
         for(int nea=0; nea<Sa->NumEdges; nea++) {
           // fetch reduced fields for this cubature point
@@ -1369,16 +1378,16 @@ HMatrix *GetSRFlux(RWGGeometry *G, HMatrix *XMatrix, cdouble Omega,
             // fetch reduced fields for this cubature point
             cdouble *ehBeta  = ehMatrix + 6*(EdgeOffsetb+neb);
 
-            /*--------------------------------------------------------------*/
-            /* extract the surface-current coefficients either from the KN  */
-            /* vector or the Sigma matrix                                   */
-            /*--------------------------------------------------------------*/
-            int nbfa = BFOffseta + ( (IsPECa) ? nea : 2*nea );
-            int nbfb = BFOffsetb + ( (IsPECb) ? neb : 2*neb );
-	    cdouble KK = DRMatrix->GetEntry(nbfb+0, nbfa+0);
-	    cdouble KN = DRMatrix->GetEntry(nbfb+1, nbfa+0);
-	    cdouble NK = DRMatrix->GetEntry(nbfb+0, nbfa+1);
-	    cdouble NN = DRMatrix->GetEntry(nbfb+1, nbfa+1);
+            /*----------------------------------------------------------------*/
+            /* extract the surface-current coefficients from the Sigma matrix */
+            /*----------------------------------------------------------------*/
+            size_t nbfa = BFOffseta + 2*nea;
+            size_t nbfb = BFOffsetb + 2*neb;
+            size_t ind = nbfb + nbfa*DRNR;
+            cdouble KK = DRZM[ind];
+            cdouble KN = DRZM[ind+1];
+            cdouble NK = DRZM[ind+DRNR];
+            cdouble NN = DRZM[ind+DRNR+1];
 
 	    /*--------------------------------------------------------------*/
 	    /* accumulate the contributions of this edge pair               */

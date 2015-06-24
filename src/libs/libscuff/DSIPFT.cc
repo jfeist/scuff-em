@@ -1251,7 +1251,7 @@ void AddEdgeEdgeSRFlux(cdouble IKZ, cdouble IKOZ, double EpsAbs, double MuAbs,
 /***************************************************************/
 
 HMatrix *GetSRFlux(RWGGeometry *G, HMatrix *XMatrix, cdouble Omega,
-                   HVector *KNVector, HMatrix *DRMatrix,
+                   HMatrix *DRMatrix,
                    HMatrix *FMatrix, bool FarField)
 { 
   /***************************************************************/
@@ -1375,25 +1375,10 @@ HMatrix *GetSRFlux(RWGGeometry *G, HMatrix *XMatrix, cdouble Omega,
             /*--------------------------------------------------------------*/
             int nbfa = BFOffseta + ( (IsPECa) ? nea : 2*nea );
             int nbfb = BFOffsetb + ( (IsPECb) ? neb : 2*neb );
-            cdouble KK, KN, NK, NN;
-            if (KNVector) {
-              cdouble kAlpha =       KNVector->GetEntry(nbfa);
-              cdouble kBeta  =       KNVector->GetEntry(nbfb);
-              cdouble nAlpha, nBeta = 0.0;
-              if (!IsPECa)
-                nAlpha = -ZVAC*KNVector->GetEntry(nbfa+1);
-              if (!IsPECb)
-                nBeta  = -ZVAC*KNVector->GetEntry(nbfb+1);
-              KK = conj(kAlpha) * kBeta;
-              KN = conj(kAlpha) * nBeta;
-              NK = conj(nAlpha) * kBeta;
-              NN = conj(nAlpha) * nBeta;
-            } else {
-              KK = DRMatrix->GetEntry(nbfb+0, nbfa+0);
-              KN = DRMatrix->GetEntry(nbfb+1, nbfa+0);
-              NK = DRMatrix->GetEntry(nbfb+0, nbfa+1);
-              NN = DRMatrix->GetEntry(nbfb+1, nbfa+1);
-            };
+	    cdouble KK = DRMatrix->GetEntry(nbfb+0, nbfa+0);
+	    cdouble KN = DRMatrix->GetEntry(nbfb+1, nbfa+0);
+	    cdouble NK = DRMatrix->GetEntry(nbfb+0, nbfa+1);
+	    cdouble NN = DRMatrix->GetEntry(nbfb+1, nbfa+1);
 
 	    /*--------------------------------------------------------------*/
 	    /* accumulate the contributions of this edge pair               */

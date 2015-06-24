@@ -556,7 +556,7 @@ void GetFlux(SNEQData *SNEQD, cdouble Omega, double *kBloch, double *Flux)
           { 
             HMatrix *SRXMatrix=SNEQD->SRXMatrix;
             HMatrix *SRFMatrix=SNEQD->SRFMatrix;
-            GetSRFlux(G, SRXMatrix, Omega, 0, SNEQD->DRMatrix, SRFMatrix);
+            GetSRFlux(G, SRXMatrix, Omega, SNEQD->DRMatrix, SRFMatrix);
 
             FILE *f=vfopen("%s.SRFlux","a",FileBase);
             for(int nx=0; nx<NX; nx++)

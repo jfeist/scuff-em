@@ -653,6 +653,10 @@ void CreateGammaMatrix(double Theta, double Phi, double *GammaMatrix);
 void PreloadCache(const char *FileName);
 void StoreCache(const char *FileName);
 
+void GetReducedFields_Nearby(RWGSurface *S, const int ne,
+			     const double X0[3], const cdouble k,
+			     cdouble e[3], cdouble h[3]);
+
 } // namespace scuff
 
 #endif // #ifndef LIBSCUFF_H

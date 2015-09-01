@@ -1333,8 +1333,13 @@ HMatrix *GetSRFlux(RWGGeometry *G, HMatrix *XMatrix, cdouble Omega,
         cdouble *h = e + 3;
         if (FarField)
           GetReducedFarFields(S, ne, X, k, e, h);
-        else
-          GetReducedFields(S, ne, X, k, e, h);
+        else {
+	  RWGEdge *E = S->Edges[ne];
+	  if (VecDistance(X,E->Centroid) < 5.*E->Radius)
+	    GetReducedFields_Nearby(S, ne, X, k, e, h);
+	  else
+	    GetReducedFields       (S, ne, X, k, e, h);
+	}
       }
     }
 
